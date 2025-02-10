@@ -1,4 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WalletConnect DApp
+
+## Overview
+This project is a decentralized application (DApp) that allows users to connect their Ethereum wallet, view token balances, wrap ETH to WETH, and swap tokens using the Uniswap V2 Router. The application is built using React and Web3.js.
+
+## Features
+- **Wallet Connection**: Connect your MetaMask wallet to interact with the Ethereum blockchain.
+- **Token Balance Display**: View your current token balance.
+- **Wrap ETH**: Convert ETH to WETH for trading.
+- **Swap Tokens**: Swap WETH for ERC-20 tokens using Uniswap V2.
+- **Max Transaction Calculation**: Automatically calculate the maximum ETH that can be swapped after deducting gas fees.
+- **Error and Success Messages**: Displays messages for transaction status with auto-dismiss after 5 seconds.
+
+## Technologies Used
+- React (Next.js framework)
+- Web3.js
+- Tailwind CSS for styling
+- Uniswap V2 Router
+
+## Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/walletconnect-dapp.git
+   cd walletconnect-dapp
+   ```
+
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+
+3. Start the development server:
+   ```sh
+   npm run dev
+   ```
+
+## Usage
+1. Open the application in your browser.
+2. Click **Connect Wallet** to connect your MetaMask account.
+3. View your token balance and wrap ETH if needed.
+4. Enter the amount of WETH you want to swap and select a token.
+5. Click **Swap WETH for ERC20** to initiate the swap.
+
+## Environment Variables
+Create a `.env.local` file and add the following environment variables if required:
+```sh
+NEXT_PUBLIC_INFURA_ID=your_infura_project_id
+NEXT_PUBLIC_ALCHEMY_KEY=your_alchemy_api_key
+```
+
+## Known Issues & Fixes
+- **Web3ValidatorError: value "" at "/0" must pass "uint256" validation**
+    - Ensure you enter a valid amount before swapping.
+    - Added validation to prevent sending empty or zero transactions.
+
+## Future Enhancements
+- Add more token swap options.
+- Implement better slippage protection.
+- Support multiple networks (Polygon, BSC, etc.).
+- Improve UI/UX.
+
+## License
+This project is licensed under the MIT License.
+
+## Author
+[Your Name]
+
 
 ## Getting Started
 
