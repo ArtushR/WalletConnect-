@@ -7,29 +7,37 @@ const UNISWAP_ABI = [
         "name": "swapExactTokensForTokens",
         "type": "function",
         "inputs": [
-            { "type": "uint256", "name": "amountIn" },
-            { "type": "uint256", "name": "amountOutMin" },
-            { "type": "address[]", "name": "path" },
-            { "type": "address", "name": "to" },
-            { "type": "uint256", "name": "deadline" }
+            {"type": "uint256", "name": "amountIn"},
+            {"type": "uint256", "name": "amountOutMin"},
+            {"type": "address[]", "name": "path"},
+            {"type": "address", "name": "to"},
+            {"type": "uint256", "name": "deadline"}
         ],
         "stateMutability": "nonpayable"
     }
 ];
 
-interface Props {
-    web3: Web3 | null;
-    account: string | null;
-    setError: (msg: string) => void;
-    setSuccess: (msg: string) => void;
+interface Token {
+    symbol: string;
+    address: string;
+    value: string;
 }
 
-export default function Swap({ web3, account, setError, setSuccess }: Props) {
+interface Props {
+    web3: Web3;
+    account: string;
+    selectedToken: Token;
+    setError: (msg: string) => void;
+    setSuccess: (msg: string) => void;
+    setSelectedToken: (token: Token) => void;
+    data: Token[];
+}
+
+export default function Swap ({web3, account, setError, setSuccess, selectedToken, setSelectedToken, data}: Props) {
     const [amount, setAmount] = useState('');
     const [gasFee, setGasFee] = useState('0');
     const [loading, setLoading] = useState(false);
     const [showInput, setShowInput] = useState(false);
-    const [selectedToken, setSelectedToken] = useState('0x6B175474E89094C44Da98b954EedeAC495271d0F'); // Default to DAI
 
     useEffect(() => {
         if (web3 && account && amount) {
@@ -66,6 +74,13 @@ export default function Swap({ web3, account, setError, setSuccess }: Props) {
         }
     };
 
+    function handleTokenChange(value: string) {
+        const token = data.find((t) => t.address === value);  // ✅ Find the full token object
+        if (token) {
+            setSelectedToken(token);
+        }
+    }
+
     const swapTokens = async () => {
         if (!web3 || !account || !amount) return alert("Enter an amount!");
 
@@ -75,7 +90,7 @@ export default function Swap({ web3, account, setError, setSuccess }: Props) {
 
             const path = [
                 web3.utils.toChecksumAddress('0xC02aaa39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
-                web3.utils.toChecksumAddress(selectedToken)
+                web3.utils.toChecksumAddress(selectedToken.address)
             ];
 
             const amountIn = web3.utils.toWei(amount, "ether");
@@ -84,7 +99,7 @@ export default function Swap({ web3, account, setError, setSuccess }: Props) {
 
             await router.methods
                 .swapExactTokensForTokens(amountIn, amountOutMin, path, account, deadline)
-                .send({ from: account });
+                .send({from: account});
 
             setSuccess("Swap Completed!");
         } catch (error) {
@@ -98,12 +113,12 @@ export default function Swap({ web3, account, setError, setSuccess }: Props) {
 
     return (
         <>
-            {showInput && (
+            { showInput && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="p-5 rounded-2xl bg-primary-200 w-[400px] pointer-events-auto">
                         <select
-                            value={selectedToken}
-                            onChange={(e) => setSelectedToken(e.target.value)}
+                            value={ selectedToken.address }
+                            onChange={ (e) => handleTokenChange(e.target.value) }
                             className="border p-2 rounded w-full mb-2"
                         >
                             <option value="0x6B175474E89094C44Da98b954EedeAC495271d0F">DAI</option>
@@ -112,33 +127,46 @@ export default function Swap({ web3, account, setError, setSuccess }: Props) {
                         </select>
                         <input
                             type="text"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            value={ selectedToken.address }
+                            readOnly placeholder="Enter WETH amount"
+                            className="border p-2 rounded w-full mb-2"
+                        />
+                        <input
+                            type="text"
+                            value={ amount }
+                            onChange={ (e) => setAmount(e.target.value) }
                             placeholder="Enter WETH amount"
                             className="border p-2 rounded w-full mb-2"
                         />
-                        {Number(amount) === 0 && <p className="text-sm text-red-600">Amount cant be 0</p>}
+                        { Number(amount) === 0 && <p className="text-sm text-red-600">Amount cant be 0</p> }
                         <div className="flex w-full gap-2 items-center mt-2">
                             <button
-                                onClick={handleMaxTransact}
+                                onClick={ handleMaxTransact }
                                 className="border border-primary-600 bg-primary-600 text-white px-4 py-2 rounded flex-1"
                             >
                                 Max Transact
                             </button>
                             <p className="border border-primary-300 text-primary-800 px-3 py-2 rounded">
-                                Gas Fee: {gasFee} ETH
+                                Gas Fee: { gasFee } ETH
                             </p>
                         </div>
-                        <div className="flex w-full justify-between gap-2.5 items-center">
+                        <div className="flex w-full justify-center gap-2 items-center">
                             <button
-                                onClick={swapTokens}
-                                className="bg-green-500 text-white px-4 py-2 rounded-xl mt-2 flex-1"
-                                disabled={loading || Number(amount) === 0}
+                                onClick={ swapTokens }
+                                className="flex justify-center gap-2 items-center bg-green-500 text-white px-4 py-2 rounded-xl mt-2 flex-1"
+                                disabled={ loading || Number(amount) === 0 }
+                            >{loading && <svg
+                                className="w-5 h-5 animate-spin text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
                             >
-                                {loading ? "Swapping..." : "Swap WETH for ERC20"}
+                                <path d="M12 2L4 12l8 5 8-5-8-10zm0 15l-8-5 8 10 8-10-8 5z" />
+                            </svg>}
+                                { loading ? "Swapping..." : "Swap WETH for ERC20" }
                             </button>
                             <button
-                                onClick={() => setShowInput(false)}
+                                onClick={ () => setShowInput(false) }
                                 className="px-4 py-2 rounded-xl mt-2 bg-primary-100 text-primary-800"
                             >
                                 Cancel swap
@@ -146,15 +174,15 @@ export default function Swap({ web3, account, setError, setSuccess }: Props) {
                         </div>
                     </div>
                 </div>
-            )}
-            {!showInput && (
+            ) }
+            { !showInput && (
                 <button
-                    onClick={() => setShowInput(true)}
+                    onClick={ () => setShowInput(true) }
                     className="bg-blue-500 text-white px-4 py-2 rounded-xl"
                 >
                     Start Swap
                 </button>
-            )}
+            ) }
         </>
     );
 }

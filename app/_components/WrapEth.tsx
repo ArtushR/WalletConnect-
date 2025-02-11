@@ -48,11 +48,26 @@ export default function WrapETH({ web3, account, setError  }: Props) {
         <div className="flex flex-col items-center">
             <button
                 onClick={wrapETH}
-                className="bg-green-400 px-4 py-2 rounded-xl disabled:opacity-50"
+                className="bg-green-400 px-4 py-2 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
                 disabled={loading}
             >
-                {loading ? "Processing..." : "Wrap ETH"}
+                {loading ? (
+                    <>
+                        <svg
+                            className="w-5 h-5 animate-spin text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M12 2L4 12l8 5 8-5-8-10zm0 15l-8-5 8 10 8-10-8 5z" />
+                        </svg>
+                        Processing...
+                    </>
+                ) : (
+                    "Wrap ETH"
+                )}
             </button>
+
 
         </div>
         </>
